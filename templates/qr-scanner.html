@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block body %}
+<h1>QR Code Scanner</h1>
+<video id="qr-video" width="100%" autoplay></video>
+<p id="result">No QR code detected yet</p>
+
+<form id="qr-form" method="POST" action="/process-qr">
+    <input type="hidden" id="qr-content" name="qr_content" value="">
+</form>
+
+<a href="/dashboard">
+    <button>
+        Back
+    </button>
+</a>
+
+<script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+<script>
+    const video = document.getElementById('qr-video');
+    const resultElement = document.getElementById('result');
+    const qrContentInput = document.getElementById('qr-content');
+    const qrForm = document.getElementById('qr-form');
+
+    const scanner = new Instascan.Scanner({ video: video });
+
+    scanner.addListener('scan', function (content) {
+        resultElement.innerText = content;
+        qrContentInput.value = content; // Set the scanned content in the hidden input field
+        qrForm.submit(); // Submit the form to send data to Flask
+    });
+
+    Instascan.Camera.getCameras()
+        .then(function (cameras) {
+            if (cameras.length > 0) {
+                scanner.start(cameras[0]);
+            } else {
+                console.error('No cameras found.');
+            }
+        })
+        .catch(function (e) {
+            console.error(e);
+        });
+</script>
+{% endblock %}

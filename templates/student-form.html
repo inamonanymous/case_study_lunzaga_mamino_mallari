@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block body %}
+<h1>Add Student</h1>
+    <form method="POST" action="/add-student">
+        <label for="firstname">First Name:</label>
+        <input type="text" id="firstname" name="firstname" required><br><br>
+
+        <label for="surname">Surname:</label>
+        <input type="text" id="surname" name="surname" required><br><br>
+
+        <label for="student_number">Student Number:</label>
+        <input type="text" id="student_number" name="student_number" required><br><br>
+
+        <label for="section">Section:</label>
+        <input type="text" id="section" name="section"><br><br>
+
+        <label for="year">Year:</label>
+        <input type="text" id="year" name="year"><br><br>
+
+        <label for="department">Department:</label>
+        <input type="text" id="department" name="department"><br><br>
+
+        <input type="submit" value="Add Student">
+    </form>
+
+
+<a href="/dashboard">
+    <button>
+        Back
+    </button>
+</a>
+{% endblock %}
