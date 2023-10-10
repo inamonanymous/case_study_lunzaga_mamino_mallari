@@ -1,7 +1,67 @@
 {% extends "layout.html" %}
 {% block body %}
+
+<style>
+        /* Heading Styles */
+    h1 {
+        font-size: 24px;
+        color: #333;
+        margin-top: 20px;
+    }
+
+    /* Video Element Style */
+    #qr-video {
+        width: 100%;
+        max-width: 800px; /* Adjust the maximum width as needed */
+        display: block;
+        margin: 20px auto;
+    }
+
+    /* Result Text Style */
+    #result {
+        font-size: 18px;
+        color: #555;
+        margin: 20px 0;
+    }
+
+    /* Form Styling */
+    #qr-form {
+        margin-top: 20px;
+    }
+
+    /* Back Button Style */
+    a button {
+        display: block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+
+    a button:hover {
+        background-color: #0056b3;
+    }
+
+    .video-container {
+    width: 100%;
+    max-width: 800px; /* Adjust the maximum width as needed */
+    display: block;
+    margin: 20px auto;
+    border: 2px solid #007bff; /* Border color and width */
+    padding: 10px; /* Add some padding for spacing */
+    border-radius: 5px; /* Rounded corners for the frame */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Optional shadow effect */
+}
+
+</style>
+
 <h1>QR Code Scanner</h1>
-<video id="qr-video" width="100%" autoplay></video>
+<div class="video-container">
+    <video id="qr-video" width="100%" autoplay></video>
+</div>
 <p id="result">No QR code detected yet</p>
 
 <form id="qr-form" method="POST" action="/process-qr">

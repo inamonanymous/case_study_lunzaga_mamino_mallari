@@ -1,5 +1,79 @@
 {% extends "layout.html" %}
 {% block body %}
+
+<style>
+    /* Heading Style */
+    h1 {
+        font-size: 24px;
+        color: #333;
+        margin-top: 20px;
+    }
+
+    /* Form Layout and Label Styles */
+    form {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 5%;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: #555;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    /* Required Field Indicator */
+    input[required] {
+        border-color: #ff0000; /* Change the border color for required fields */
+    }
+
+    /* Submit Button Style */
+    input[type="submit"] {
+        display: block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+
+    /* Back Button Style (similar to Submit button) */
+    a button {
+        display: block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+
+    a button:hover {
+        background-color: #0056b3;
+    }
+
+</style>
+
 <h1>Add Student</h1>
     <form method="POST" action="/add-student">
         <label for="firstname">First Name:</label>
@@ -22,8 +96,6 @@
 
         <input type="submit" value="Add Student">
     </form>
-
-
 <a href="/dashboard">
     <button>
         Back

@@ -1,5 +1,65 @@
 {% extends "layout.html" %}
 {% block body %}
+
+<style>
+    form {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Heading Style */
+    h3 {
+        color: #333;
+    }
+
+    /* Select Box Style */
+    select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fff;
+    }
+
+    /* Submit Button Style */
+    #submit {
+        display: block;
+        margin-top: 10px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    #submit:hover {
+        background-color: #0056b3;
+    }
+
+    /* Add Student Button Style */
+    a button {
+        display: block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+
+    a button:hover {
+        background-color: #0056b3;
+    }
+</style>
+
 <form action="/get-section" method="POST">
 
     <div>

@@ -27,8 +27,6 @@ def index():
 @app.route('/scan-qr/<string:year>/<string:section>', methods=['POST', 'GET'])
 def scan_qr(year, section):
     if 'username' in session:
-        
-
         return render_template("qr-scanner.html")
     return redirect(url_for('index'))
 
@@ -124,28 +122,43 @@ def process_qr():
     qr_content = request.form.get('qr_content')
     if qr_content:
         student = Student.query.filter_by(student_number=qr_content).first()
-
         if student:
-            data = [
-                {'student_number': student.student_number,
-                 'firstname': student.firstname,
-                 'surname': student.surname,
-                 'department': student.department
-                 }
-            ]
             year = student.year
             section = student.section
             current_date = date.today().strftime("%Y-%m-%d")
-            
             filename = generate_file_name(year, section, current_date)
             
-            with open(filename, mode='a', newline='') as csv_file:
-                csv_writer = csv.DictWriter(csv_file, fieldnames=data[0].keys())
-                # Check if the file is empty, and write headers if needed
-                if os.stat(filename).st_size == 0:
+            # Check if the CSV file exists
+            if not os.path.exists(filename):
+                # If it doesn't exist, create the file and write the headers
+                with open(filename, mode='w', newline='') as csv_file:
+                    csv_writer = csv.DictWriter(csv_file, fieldnames=['student_number', 'firstname', 'surname', 'department'])
                     csv_writer.writeheader()
-                csv_writer.writerows(data)
-            return f"Student added to CSV file at {year}, Year and {section}, Section"
+            
+            # Check if the student is already in the CSV file
+            student_in_csv = False
+            with open(filename, mode='r', newline='') as csv_file:
+                csv_reader = csv.DictReader(csv_file)
+                for row in csv_reader:
+                    if row['student_number'] == student.student_number:
+                        student_in_csv = True
+                        break
+
+            if not student_in_csv:
+                data = [
+                    {'student_number': student.student_number,
+                     'firstname': student.firstname,
+                     'surname': student.surname,
+                     'department': student.department
+                     }
+                ]
+
+                with open(filename, mode='a', newline='') as csv_file:
+                    csv_writer = csv.DictWriter(csv_file, fieldnames=data[0].keys())
+                    csv_writer.writerows(data)
+                return f"Student added to CSV file at {year}, Year and {section}, Section"
+            else:
+                return "Student already in CSV file."
 
         return f"{student.firstname}"
     else:

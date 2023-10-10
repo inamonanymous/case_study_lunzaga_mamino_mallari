@@ -1,5 +1,60 @@
 {% extends "layout.html" %}
 {% block body %}
+
+<style>
+    /* Heading Styles */
+    h1 {
+        font-size: 24px;
+        color: #333;
+    }
+
+    h3 {
+        font-size: 18px;
+        color: #555;
+    }
+
+    /* Scan Attendance Button Style */
+    a button {
+        display: block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+
+    a button:hover {
+        background-color: #0056b3;
+    }
+
+    /* Table Styles */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    /* QR Code Image Styles */
+    table img {
+        width: 50px;
+        height: 50px;
+    }
+
+</style>
+
 <h1>Student Table</h1>
 <h3>{{ selected_year }} Year</h3>
 <h3>Section: {{ selected_section }}</h3>
@@ -30,4 +85,10 @@
             {% endfor %}
         </tbody>
     </table>
+
+<a href="/dashboard">
+    <button>
+        Back
+    </button>
+</a>
 {% endblock %}
