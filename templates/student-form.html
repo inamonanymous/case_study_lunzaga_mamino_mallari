@@ -85,14 +85,14 @@
         <label for="student_number">Student Number:</label>
         <input type="text" id="student_number" name="student_number" required><br><br>
 
-        <label for="section">Section:</label>
-        <input type="text" id="section" name="section"><br><br>
+        <label for="section">Section: {{ current_dept.section }}</label>
+        <input type="text" id="section" name="section" value="{{ current_dept.section }}" hidden><br><br>
 
-        <label for="year">Year:</label>
-        <input type="text" id="year" name="year"><br><br>
+        <label for="year">Year: {{ current_dept.year }}</label>
+        <input type="text" id="year" name="year" value="{{  current_dept.year  }}" hidden><br><br>
 
-        <label for="department">Department:</label>
-        <input type="text" id="department" name="department"><br><br>
+        <label for="department">Department: {{ current_dept.course }}</label>
+        <input type="text" id="department" name="department" value="{{  current_dept.id }}" hidden><br><br>
 
         <input type="submit" value="Add Student">
     </form>

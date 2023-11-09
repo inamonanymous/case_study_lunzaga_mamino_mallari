@@ -60,70 +60,87 @@
     }
 </style>
 
-<form action="/get-section" method="POST">
 
-    <div>
-        <h3>Select Student Level</h3>
-        <select id="yearSelect" name="year">
-            <option value="" disabled selected>Select Year</option>
-            {% set years = ["1st", "2nd", "3rd", "4th"] %}
-            {% for year in years %}
-            <option value="{{ year }}">{{ year }}</option>
-            {% endfor %}
-        </select>
-    </div>
-        
-    <div id="sectionDropdown" style="display: none;">
-        <h3>Select a Section</h3>
-        <select name="section">
-            <option value="" disabled selected>Select Section</option>
-            <option value="irreg">Irregular</option>
-        </select>
-    </div>
+<div>
+    <form action="/get-section" method="POST">
 
-    <input type="submit" id="submit" value="Submit" style="display: none;">
-</form>
+        <div>
+            <h3>Select Student Department</h3>
+            <select id="deptSelect" name="dept">
+                <option value="" disabled selected>Select Department</option>
+                {% for i in department_courses %}
+                    {% for j in i %}
+                        <option value="{{ j }}">{{ j }}</option>
+                    {% endfor %}
+                {% endfor %}
+            </select>
+        </div>
+        <div id="sectionDropdown" style="display: none;">
+            <h3>Select Student Level</h3>
+            <select id="yearSelect" name="year">
+                <option value="" disabled selected>Select Year</option>
+                {% for i in department_years %}
+                    {% for j in i %}
+                        <option value="{{ j }}">{{ j }}</option>
+                    {% endfor %}
+                {% endfor %}
+            </select>
+        </div>
+            
+        <div id="sectionDropdown1" style="display: none;">
+            <h3>Select a Section</h3>
+            <select name="section">
+                <option value="" disabled selected>Select Section</option>
+                {% for i in department_sections %}
+                    {% for j in i %}
+                        <option value="{{ j }}">{{ j }}</option>
+                    {% endfor %}
+                {% endfor %}
+            </select>
+        </div>
 
+        <input type="submit" id="submit" value="Submit" style="display: none;">
+    </form>
+</div>
 <br>
 
-<a href="/student-form">
-    <button>
-        Add Student
-    </button>
-</a>
+
 
 
 {% block javascript %}
 <script>
     $(document).ready(function () {
-        $('#yearSelect').change(function () {
-            var selectedYear = $(this).val();
-            console.log('Year selected: ' + selectedYear); // Add this line for debugging
-            if (selectedYear) {
-                $('#sectionDropdown').show();
-                $('#submit').prop('disabled', false).show();
-                var sectionOptions = "";
-                switch (selectedYear) {
-                    case "1st":
-                        sectionOptions = '<option value="1a1">1a1</option><option value="1a2">1a2</option><option value="1a3">1a3</option><option value="1a4">1a4</option>';
-                        break;
-                    case "2nd":
-                        sectionOptions = '<option value="2a1">2a1</option><option value="2a2">2a2</option><option value="2a3">2a3</option><option value="2a4">2a4</option>';
-                        break;
-                    case "3rd":
-                        sectionOptions = '<option value="3a1">3a1</option><option value="3a2">3a2</option><option value="3a3">3a3</option><option value="3a4">3a4</option>';
-                        break;
-                    case "4th":
-                        sectionOptions = '<option value="4a1">4a1</option><option value="4a2">4a2</option><option value="4a3">4a3</option><option value="4a4">4a4</option>';
-                        break;
-                    default:
-                        sectionOptions = '<option value="" disabled selected>Select Section</option>';
+        $('#deptSelect').change(function () {
+            $('#sectionDropdown').show();
+            $('#yearSelect').change(function () {
+                var selectedYear = $(this).val();
+                console.log('Year selected: ' + selectedYear); // Add this line for debugging
+                if (selectedYear) {
+                    $('#sectionDropdown1').show();
+                    $('#submit').prop('disabled', false).show();
+                    var sectionOptions = "";
+                    switch (selectedYear) {
+                        case "1st":
+                            sectionOptions = '<option value="1a1">1a1</option><option value="1a2">1a2</option><option value="1a3">1a3</option><option value="1a4">1a4</option>';
+                            break;
+                        case "2nd":
+                            sectionOptions = '<option value="2a1">2a1</option><option value="2a2">2a2</option><option value="2a3">2a3</option><option value="2a4">2a4</option>';
+                            break;
+                        case "3rd":
+                            sectionOptions = '<option value="3a1">3a1</option><option value="3a2">3a2</option><option value="3a3">3a3</option><option value="3a4">3a4</option>';
+                            break;
+                        case "4th":
+                            sectionOptions = '<option value="4a1">4a1</option><option value="4a2">4a2</option><option value="4a3">4a3</option><option value="4a4">4a4</option>';
+                            break;
+                        default:
+                            sectionOptions = '<option value="" disabled selected>Select Section</option>';
+                    }
+                    $('select[name="section"]').html(sectionOptions);
+                } else {
+                    $('#sectionDropdown').hide();
+                    $('#submit').prop('disabled', true).hide();
                 }
-                $('select[name="section"]').html(sectionOptions);
-            } else {
-                $('#sectionDropdown').hide();
-                $('#submit').prop('disabled', true).hide();
-            }
+            });
         });
     });
 </script>

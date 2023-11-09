@@ -58,6 +58,12 @@
 <h1>Student Table</h1>
 <h3>{{ selected_year }} Year</h3>
 <h3>Section: {{ selected_section }}</h3>
+<a href="/student-form/{{ selected_dept }}/{{ selected_year }}/{{ selected_section }}">
+    <button>
+        Add Student
+    </button>
+</a>
+
 <a href="/scan-qr/{{ selected_year }}/{{ selected_section }}">
     <button>Scan Attendance</button>
 </a>
@@ -67,22 +73,24 @@
                 <th>First Name</th>
                 <th>Surname</th>
                 <th>Student Number</th>
-                <th>Section</th>
                 <th>Department</th>
                 <th>QR Code</th>
             </tr>
         </thead>
         <tbody>
-            {% for student in students %}
-                <tr>
-                    <td>{{ student.firstname }}</td>
-                    <td>{{ student.surname }}</td>
-                    <td>{{ student.student_number }}</td>
-                    <td>{{ student.section }}</td>
-                    <td>{{ student.department }}</td>
-                    <td><img src="{{ url_for('static', filename='qrcodes/'+student.student_number+'.png') }}" alt="qr code of this student" width="50%" height="50%"></td>
-                </tr>
-            {% endfor %}
+            {% if not students %}
+                <tr></tr>
+            {% else %}
+                {% for student in students %}
+                    <tr>
+                        <td>{{ student.firstname }}</td>
+                        <td>{{ student.surname }}</td>
+                        <td>{{ student.student_number }}</td>
+                        <td>{{ student.department }}</td>
+                        <td><img src="{{ url_for('static', filename='qrcodes/'+student.student_number+'.png') }}" alt="qr code of this student" width="50%" height="50%"></td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
         </tbody>
     </table>
 

@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for, session
 from flask_migrate import Migrate
 import qrcode
 import os
-from model.models import db, Student, Admin
+from model.models import db, Student, Admin, Department
 import csv
 from datetime import date
 
@@ -30,18 +30,24 @@ def scan_qr(year, section):
         return render_template("qr-scanner.html")
     return redirect(url_for('index'))
 
-@app.route('/student-form')
-def student_form():
+@app.route('/student-form/<string:dept>/<string:year>/<string:section>')
+def student_form(dept, year, section):
     if 'username' in session:
-        return render_template('student-form.html')
+        current_dept = Department.query.filter_by(course=dept, year=year, section=section).first()
+        if not current_dept:
+            return redirect(url_for('section_page'))
+        return render_template('student-form.html', current_dept=current_dept)
     return redirect(url_for('index'))
 
 @app.route('/section-page', methods=['GET'])
 def section_page():
     if 'username' in session:
-        selected_year, selected_section = request.args.get('year'), request.args.get('section')
-        students = Student.query.filter_by(section=selected_section).all()
-        return render_template('students.html', selected_year=selected_year, selected_section=selected_section, students=students)
+        selected_dept, selected_year, selected_section = request.args.get('dept'), request.args.get('year'), request.args.get('section')
+        student_dept = Department.query.filter_by(course=selected_dept, section=selected_section).first()
+        if not student_dept:
+            return render_template('students.html', selected_dept=selected_dept, selected_year=selected_year, selected_section=selected_section, students=None)
+        students = Student.query.filter_by(department=student_dept.id).all()
+        return render_template('students.html', selected_dept=selected_dept, selected_year=selected_year, selected_section=selected_section, students=students)
     return redirect(url_for('index'))
 
 @app.route('/get-section', methods=['POST'])
@@ -49,13 +55,23 @@ def get_section():
     if 'username' in session:
         selected_year = request.form.get('year')
         selected_section = request.form.get('section')
-        return redirect(url_for('section_page', year=selected_year, section=selected_section))
+        selected_dept = request.form.get('dept')
+        return redirect(url_for('section_page', 
+                                    dept=selected_dept,
+                                    year=selected_year,
+                                    section=selected_section))
     return redirect(url_for('index'))
 
 @app.route('/dashboard', methods=['POST', 'GET'])
 def dashboard():
     if 'username' in session:
-        return render_template('dashboard.html')
+        department_courses = Department.query.with_entities(Department.course).distinct().all()
+        department_years = Department.query.with_entities(Department.year).distinct().all()
+        department_sections = Department.query.with_entities(Department.section).distinct().all()
+        return render_template('dashboard.html',
+                                department_courses=department_courses,
+                                department_years=department_years,
+                                department_sections=department_sections)
     return redirect(url_for('index'))
 
 @app.route('/admin-login', methods=['POST', 'GET'])
@@ -123,10 +139,9 @@ def process_qr():
     if qr_content:
         student = Student.query.filter_by(student_number=qr_content).first()
         if student:
-            year = student.year
-            section = student.section
+            student_dept = Department.query.filter_by(id=student.department)
             current_date = date.today().strftime("%Y-%m-%d")
-            filename = generate_file_name(year, section, current_date)
+            filename = generate_file_name(student_dept.year, student_dept.section, current_date)
             
             # Check if the CSV file exists
             if not os.path.exists(filename):
@@ -156,7 +171,7 @@ def process_qr():
                 with open(filename, mode='a', newline='') as csv_file:
                     csv_writer = csv.DictWriter(csv_file, fieldnames=data[0].keys())
                     csv_writer.writerows(data)
-                return f"Student added to CSV file at {year}, Year and {section}, Section"
+                return f"Student added to CSV file at {student_dept.year}, Year and {student_dept.section}, Section"
             else:
                 return "Student already in CSV file."
 
@@ -166,4 +181,4 @@ def process_qr():
 
 if __name__ == '__main__':
     
-    app.run(host="0.0.0.0",port="5000",debug=True)
+    app.run(host="0.0.0.0",port="8000",debug=True)

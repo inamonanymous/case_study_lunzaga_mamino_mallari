@@ -8,9 +8,7 @@ class Student(db.Model):
     firstname = db.Column(db.String(50), nullable=False)
     surname = db.Column(db.String(50), nullable=False)
     student_number = db.Column(db.String(20), unique=True, nullable=False)
-    year = db.Column(db.String(20))
-    section = db.Column(db.String(20))
-    department = db.Column(db.String(50))
+    department = db.Column(db.Integer)
     qrcode = db.Column(db.String(255), nullable=True)
 
     def __init__(self, firstname, surname, student_number, year, section=None, department=None, qrcode=None):
@@ -22,6 +20,11 @@ class Student(db.Model):
         self.department = department
         self.qrcode = qrcode
 
+class Department(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    course=db.Column(db.String(50))
+    year=db.Column(db.String(50))
+    section=db.Column(db.String(20))
 
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
