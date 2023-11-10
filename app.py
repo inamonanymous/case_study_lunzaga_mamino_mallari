@@ -1,4 +1,5 @@
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, request, render_template, redirect, url_for, session, jsonify
+
 from flask_migrate import Migrate
 import qrcode
 import os
@@ -45,7 +46,7 @@ def section_page():
         selected_dept, selected_year, selected_section = request.args.get('dept'), request.args.get('year'), request.args.get('section')
         student_dept = Department.query.filter_by(course=selected_dept, section=selected_section).first()
         if not student_dept:
-            return render_template('students.html', selected_dept=selected_dept, selected_year=selected_year, selected_section=selected_section, students=None)
+            return redirect(url_for('dashboard'))
         students = Student.query.filter_by(department=student_dept.id).all()
         return render_template('students.html', selected_dept=selected_dept, selected_year=selected_year, selected_section=selected_section, students=students)
     return redirect(url_for('index'))
@@ -60,6 +61,47 @@ def get_section():
                                     dept=selected_dept,
                                     year=selected_year,
                                     section=selected_section))
+    return redirect(url_for('index'))
+
+@app.route('/get-section-by-level/<string:year>/<string:dept>')
+def get_section_by_level(year, dept):
+    if 'username' in session:
+        department_section_by_level = Department.query.filter_by(year=year, course=dept).with_entities(Department.section).distinct().all()
+        if not department_section_by_level:
+            return jsonify({"message": "object empty"}), 401
+        data = {
+            "section": [j for i in department_section_by_level for j in i]
+        }
+        return jsonify(data), 201
+    return redirect(url_for('index'))
+
+@app.route('/get-year-by-department/<string:dept>')
+def get_year_by_department(dept):
+    if 'username' in session:
+        department_year_by_dept = Department.query.filter_by(course=dept).with_entities(Department.year).distinct().all()
+        if not department_year_by_dept:
+            return jsonify({"message": "object empty"}), 401
+        data = {
+            "year": [j for i in department_year_by_dept for j in i]
+        }
+        return jsonify(data)
+    return redirect(url_for('index')), 201
+
+@app.route('/save-department', methods=['POST', 'GET'])
+def save_department():
+    if 'username' in session:
+        course, year, section = request.form['course'].strip(), request.form['year'].strip(), request.form['section'].strip()
+        check_dept = Department.query.filter_by(course=course, year=year, section=section).first()
+        if check_dept:
+            return "not allowed"
+        dept_entry = Department(
+            course=course,
+            year=year,
+            section=section
+        )
+        db.session.add(dept_entry)
+        db.session.commit()
+        return redirect(url_for('dashboard'))
     return redirect(url_for('index'))
 
 @app.route('/dashboard', methods=['POST', 'GET'])
@@ -139,7 +181,7 @@ def process_qr():
     if qr_content:
         student = Student.query.filter_by(student_number=qr_content).first()
         if student:
-            student_dept = Department.query.filter_by(id=student.department)
+            student_dept = Department.query.filter_by(id=student.department).first()
             current_date = date.today().strftime("%Y-%m-%d")
             filename = generate_file_name(student_dept.year, student_dept.section, current_date)
             

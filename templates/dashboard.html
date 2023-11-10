@@ -1,8 +1,16 @@
 {% extends "layout.html" %}
 {% block body %}
 
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
 <style>
-    form {
+    /* Additional styles can be added here */
+    .card {
+        margin-bottom: 20px; /* Adds spacing between cards */
+    }
+    
+    /* Your existing styles */
+    .select_department_div {
         max-width: 400px;
         margin: 0 auto;
         padding: 20px;
@@ -11,13 +19,11 @@
         border-radius: 5px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-
-    /* Heading Style */
+    
     h3 {
         color: #333;
     }
-
-    /* Select Box Style */
+    
     select {
         width: 100%;
         padding: 10px;
@@ -27,7 +33,6 @@
         background-color: #fff;
     }
 
-    /* Submit Button Style */
     #submit {
         display: block;
         margin-top: 10px;
@@ -43,7 +48,6 @@
         background-color: #0056b3;
     }
 
-    /* Add Student Button Style */
     a button {
         display: block;
         margin-top: 20px;
@@ -60,89 +64,156 @@
     }
 </style>
 
-
-<div>
-    <form action="/get-section" method="POST">
-
-        <div>
-            <h3>Select Student Department</h3>
-            <select id="deptSelect" name="dept">
-                <option value="" disabled selected>Select Department</option>
-                {% for i in department_courses %}
-                    {% for j in i %}
-                        <option value="{{ j }}">{{ j }}</option>
-                    {% endfor %}
-                {% endfor %}
-            </select>
-        </div>
-        <div id="sectionDropdown" style="display: none;">
-            <h3>Select Student Level</h3>
-            <select id="yearSelect" name="year">
-                <option value="" disabled selected>Select Year</option>
-                {% for i in department_years %}
-                    {% for j in i %}
-                        <option value="{{ j }}">{{ j }}</option>
-                    {% endfor %}
-                {% endfor %}
-            </select>
-        </div>
-            
-        <div id="sectionDropdown1" style="display: none;">
-            <h3>Select a Section</h3>
-            <select name="section">
-                <option value="" disabled selected>Select Section</option>
-                {% for i in department_sections %}
-                    {% for j in i %}
-                        <option value="{{ j }}">{{ j }}</option>
-                    {% endfor %}
-                {% endfor %}
-            </select>
+<div class="container mt-5">
+    <div class="row">
+        <!-- First Column -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <button onclick="showDeptForm(this)">
+                        Add Department
+                    </button>
+                    <div id="department-form" style="display: none;">
+                        <form action="/save-department" method="post">
+                            <label for="course">Course: </label>
+                            <input type="text" id="course" name="course"><br>
+                            <label for="year">Year: </label>
+                            <input type="text" id="year" name="year"><br>
+                            <label for="section">Section: </label>
+                            <input type="text" id="section" name="section"><br>
+                            <button type="submit">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <input type="submit" id="submit" value="Submit" style="display: none;">
-    </form>
+        <!-- Second Column -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <form action="/get-section" method="POST" class="select_department_div">
+                        <div>
+                            <h3>Select Student Room</h3>
+                            <select id="deptSelect" name="dept">
+                                <option value="" disabled selected>Select Department</option>
+                                {% for i in department_courses %}
+                                    {% for j in i %}
+                                        <option value="{{ j }}">{{ j }}</option>
+                                    {% endfor %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div id="sectionDropdown" style="display: none;">
+                            <h3>Select Student Level</h3>
+                            <select id="yearSelect" name="year">
+                                <option value="" disabled selected>Select Year</option>
+                                {% for i in department_years %}
+                                    {% for j in i %}
+                                        <option value="{{ j }}">{{ j }}</option>
+                                    {% endfor %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div id="sectionDropdown1" style="display: none;">
+                            <h3>Select a Section</h3>
+                            <select name="section">
+                                <option value="" disabled selected>Select Section</option>
+                                <!-- Options will be dynamically added here -->
+                            </select>
+                        </div>
+                        <input type="submit" id="submit" value="Submit" style="display: none;">
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Third Column -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Content for the third container -->
+                    jsdfo;ajshfkjashfaklsjfhasdjfh
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<br>
-
-
 
 
 {% block javascript %}
 <script>
     $(document).ready(function () {
         $('#deptSelect').change(function () {
+            var selectedDept = $(this).val();
+            var sectionOptions = '<option value="" disabled selected>Select Section</option>';
             $('#sectionDropdown').show();
-            $('#yearSelect').change(function () {
-                var selectedYear = $(this).val();
-                console.log('Year selected: ' + selectedYear); // Add this line for debugging
-                if (selectedYear) {
-                    $('#sectionDropdown1').show();
-                    $('#submit').prop('disabled', false).show();
-                    var sectionOptions = "";
-                    switch (selectedYear) {
-                        case "1st":
-                            sectionOptions = '<option value="1a1">1a1</option><option value="1a2">1a2</option><option value="1a3">1a3</option><option value="1a4">1a4</option>';
-                            break;
-                        case "2nd":
-                            sectionOptions = '<option value="2a1">2a1</option><option value="2a2">2a2</option><option value="2a3">2a3</option><option value="2a4">2a4</option>';
-                            break;
-                        case "3rd":
-                            sectionOptions = '<option value="3a1">3a1</option><option value="3a2">3a2</option><option value="3a3">3a3</option><option value="3a4">3a4</option>';
-                            break;
-                        case "4th":
-                            sectionOptions = '<option value="4a1">4a1</option><option value="4a2">4a2</option><option value="4a3">4a3</option><option value="4a4">4a4</option>';
-                            break;
-                        default:
-                            sectionOptions = '<option value="" disabled selected>Select Section</option>';
+            $('#sectionDropdown1').hide();
+            axios.get(`/get-year-by-department/${selectedDept}`).then(response => {
+                if (response.status===201){
+                    let data 
+                }else{
+                    let data = response.data.year;
+                    let sectionOptions = '<option value="" disabled selected>Select Year</option>'
+                    if (data.length>0){
+                        for (let i=0; i<data.length; i++){
+                            sectionOptions += `<option value="${data[i]}">${data[i]}</option>`;
+                        }
+                        $('select[name="year"]').html(sectionOptions);
+                        $('#sectionDropdown').show();
+                    } else {
+                        let sectionOptions = '<option value="" disabled selected>Select Section</option>';
+                        $('select[name="year"]').html(sectionOptions);
+                        $('#sectionDropdown').show();
                     }
-                    $('select[name="section"]').html(sectionOptions);
+                }
+            }).catch(error => {
+
+            });
+            $('#yearSelect').change(function ()  {
+                var selectedYear = $(this).val();
+                var selectedDept = $('#deptSelect').val();
+
+                if (selectedYear && selectedDept) {
+                    axios.get(`/get-section-by-level/${selectedYear}/${selectedDept}`).then(response => {
+                        if (response.status===201){
+                            let data = response.data.section;
+                            let sectionOptions = '<option value="" disabled selected>Select Section</option>';
+                            if (data.length > 0) {
+                                for (let i = 0; i < data.length; i++) {
+                                    sectionOptions += `<option value="${data[i]}">${data[i]}</option>`;
+                                }
+                            } 
+                            $('select[name="section"]').html(sectionOptions);
+                            $('#sectionDropdown1').show();
+                            $('#submit').prop('disabled', false).show();
+                        } else {
+                            let sectionOptions = '<option value="" disabled selected>Select Section</option>';
+                            $('select[name="section"]').html(sectionOptions);
+                            $('#sectionDropdown1').show();
+                            $('#submit').prop('disabled', false).show();
+                        }
+                    }).catch(error => {
+                        console.log(error.data);
+                    });                  
                 } else {
-                    $('#sectionDropdown').hide();
-                    $('#submit').prop('disabled', true).hide();
+                    $('#sectionDropdown1').hide();
+                    $('#submit').hide();
                 }
             });
         });
     });
+    
+    function showDeptForm(btn){
+        let departmentForm = document.getElementById("department-form");
+        if (departmentForm.style.display === "none"){
+            departmentForm.style.display = "block";
+            btn.innerHTML="Hide";
+        } else{
+            btn.innerHTML="Add Department"
+            departmentForm.style.display = "none";
+        }
+    }
 </script>
     {% endblock %}
 {% endblock %}
