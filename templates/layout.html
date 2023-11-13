@@ -3,27 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     <title>QR Code Attendance System</title>
-
+    
     <style>
         body {
             background-size: cover; /* Adjust the size as needed */
             background-repeat: no-repeat;
             background-attachment: fixed;
             background-position: center center;
-
+            
             /* Set the height of the container to 100% of the viewport height */
             height: 100vh;
-
+            
             /* Center content vertically and horizontally using flexbox */
             
-            }
-    </style>
+        }
+        </style>
 </head>
 <body>
+    
+    <header class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">QR Code Attendance System</a>
+        </div>
+    </header>
     {% block body %} {% endblock %}
+    <!-- Add this code at the end of your file, inside the body block -->
+
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">
+                A Case study conducted by 3 researchers the 3rd year Bachelor 
+                Science of Information Technology students of Saint Vincent College 
+                of Cabuyao named
+                <ul>
+                    <li>
+                        <i>Lunzaga, Danjhay</i>        
+                    </li>
+                    <li>
+                        <i>Mallari, Shaena</i>
+                    </li>
+                    <li>
+                        <i>Mamino, Lee Mae</i>
+                    </li>
+                </ul>                 
+                All Rights Reserved &copy; 2023
+            </span>
+                
+        </div>
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </body>
 </html>

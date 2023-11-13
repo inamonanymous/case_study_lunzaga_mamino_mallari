@@ -4,9 +4,10 @@
 <style>
     /* Heading Style */
     h1 {
-        font-size: 24px;
+        font-size: 28px;
         color: #333;
         margin-top: 20px;
+        text-align: center;
     }
 
     /* Form Layout and Label Styles */
@@ -33,6 +34,7 @@
         margin-bottom: 15px;
         border: 1px solid #ccc;
         border-radius: 5px;
+        font-size: 16px;
     }
 
     /* Required Field Indicator */
@@ -41,64 +43,47 @@
     }
 
     /* Submit Button Style */
-    input[type="submit"] {
-        display: block;
+    input[type="submit"], a.button {
+        display: inline-block;
         margin-top: 20px;
-        padding: 10px 20px;
+        padding: 12px 20px;
         background-color: #007bff;
         color: #fff;
         border: none;
         border-radius: 5px;
         cursor: pointer;
-    }
-
-    input[type="submit"]:hover {
-        background-color: #0056b3;
-    }
-
-    /* Back Button Style (similar to Submit button) */
-    a button {
-        display: block;
-        margin-top: 20px;
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
         text-decoration: none;
+        text-align: center;
+        transition: background-color 0.3s;
     }
 
-    a button:hover {
+    input[type="submit"]:hover, a.button:hover {
         background-color: #0056b3;
     }
-
 </style>
 
 <h1>Add Student</h1>
-    <form method="POST" action="/add-student">
-        <label for="firstname">First Name:</label>
-        <input type="text" id="firstname" name="firstname" required><br><br>
+<form method="POST" action="/add-student">
+    <label for="firstname">First Name:</label>
+    <input type="text" id="firstname" name="firstname" required>
 
-        <label for="surname">Surname:</label>
-        <input type="text" id="surname" name="surname" required><br><br>
+    <label for="surname">Surname:</label>
+    <input type="text" id="surname" name="surname" required>
 
-        <label for="student_number">Student Number:</label>
-        <input type="text" id="student_number" name="student_number" required><br><br>
+    <label for="student_number">Student Number:</label>
+    <input type="text" id="student_number" name="student_number" required>
 
-        <label for="section">Section: {{ current_dept.section }}</label>
-        <input type="text" id="section" name="section" value="{{ current_dept.section }}" hidden><br><br>
+    <label for="section">Section: {{ current_dept.section }}</label>
+    <input type="text" id="section" name="section" value="{{ current_dept.section }}" hidden>
 
-        <label for="year">Year: {{ current_dept.year }}</label>
-        <input type="text" id="year" name="year" value="{{  current_dept.year  }}" hidden><br><br>
+    <label for="year">Year: {{ current_dept.year }}</label>
+    <input type="text" id="year" name="year" value="{{ current_dept.year }}" hidden>
 
-        <label for="department">Department: {{ current_dept.course }}</label>
-        <input type="text" id="department" name="department" value="{{  current_dept.id }}" hidden><br><br>
+    <label for="department">Department: {{ current_dept.course }}</label>
+    <input type="text" id="department" name="department" value="{{ current_dept.id }}" hidden>
 
-        <input type="submit" value="Add Student">
-    </form>
-<a href="/dashboard">
-    <button>
-        Back
-    </button>
-</a>
+    <input type="submit" value="Add Student">
+    <a class="btn btn-outline-danger" href="/dashboard">Back</a>
+</form>
+
 {% endblock %}

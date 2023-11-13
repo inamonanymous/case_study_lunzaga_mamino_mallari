@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
-
+from sqlalchemy import and_, or_
 from flask_migrate import Migrate
 import qrcode
 import os
@@ -14,11 +14,128 @@ QR_CODE_FOLDER = 'static/qrcodes'  # Folder to save QR code images
 app.secret_key = "mamino_mallari_lunzaga"
 migrate = Migrate(app, db)
 
-def generate_file_name(year_folder, section_folder, current_date=date.today().strftime("%Y-%m-%d")):
-    data_folder = os.path.join('attendance_data', year_folder, section_folder)
+def generate_file_name(dept_folder, year_folder, section_folder, current_date=date.today().strftime("%Y-%m-%d")):
+    data_folder = os.path.join('attendance_data', dept_folder, year_folder, section_folder)
     os.makedirs(data_folder, exist_ok=True)
 
     return os.path.join(data_folder, f"attendance_at_{current_date}.csv")
+
+@app.route('/delete-department/<int:id>', methods=['DELETE'])
+def delete_department(id):
+    if 'username' not in session:
+        return redirect(url_for('index'))
+    target_department = Department.query.filter_by(id=id).first()
+    if not target_department:
+        return jsonify({"message": "not deleted"})    
+    db.session.delete(target_department)
+    db.session.commit()
+    return jsonify({"message": "deleted"})
+
+@app.route('/filter-departments', methods=['GET'])
+def filter_departments():
+    if 'username' in session:
+        course = request.args.get("course")
+        year = request.args.get("year")
+        section = request.args.get("section")
+
+        query = Department.query
+
+        if course:
+            query = query.filter(Department.course == str(course))
+
+        if year:
+            query = query.filter(Department.year == str(year))
+
+        if section:
+            query = query.filter(Department.section == str(section))
+
+        departments = query.all()
+
+        departments_list = [{
+            'id': i.id,
+            'course': i.course,
+            'year': i.year,
+            'section': i.section,
+        } for i in departments]
+
+        return jsonify(departments_list)
+
+    return redirect(url_for('index'))
+
+@app.route('/filter-students', methods=['GET'])
+def filter_students():
+    if 'username' in session:
+        course = request.args.get("course")
+        year = request.args.get("year")
+        section = request.args.get("section")
+
+        query = db.session.query(
+            Student.firstname,
+            Student.surname,
+            Student.student_number,
+            Department.course,
+            Department.year,
+            Department.section,
+            Student.qrcode
+        ).join(Department, and_(Student.department == Department.id))
+
+        if course:
+            query = query.filter(Department.course == str(course))
+
+        if year:
+            query = query.filter(Department.year == str(year))
+
+        if section:
+            query = query.filter(Department.section == str(section))
+
+
+        students = query.all()
+
+        students_list = [{
+            'student_firstname': i.firstname,
+            'student_surname': i.surname,
+            'student_number': i.student_number,
+            'department_course': i.course,
+            'department_year': i.year,
+            'department_section': i.section,
+            'student_qrcode': i.qrcode
+        } for i in students]
+
+        return jsonify(students_list)
+
+    return redirect(url_for('index'))
+
+@app.route('/manage-records')
+def manage_records():
+    if 'username' in session:
+        option = request.args.get("manage-records-select")
+        department_courses = Department.query.with_entities(Department.course).distinct().all()
+        department_years = Department.query.with_entities(Department.year).distinct().all()
+        department_sections = Department.query.with_entities(Department.section).distinct().all()
+        if option=="1":
+            departments = Department.query.all()    
+            return render_template('manage-department.html', departments=departments,
+                                department_courses=department_courses,
+                                department_years=department_years,
+                                department_sections=department_sections)
+
+        students = Student.query.\
+            with_entities(Student.firstname,
+                      Student.surname,
+                      Student.student_number,
+                      Department.course,
+                      Department.year,
+                      Department.section,
+                      Student.qrcode
+                      ).\
+            join(Department, Student.department == Department.id).all()
+        
+        return render_template('manage-students.html', 
+                               students=students, 
+                               department_courses=department_courses,
+                               department_years=department_years,
+                               department_sections=department_sections)
+    return redirect(url_for('index'))
 
 @app.route('/')
 def index():
@@ -183,7 +300,7 @@ def process_qr():
         if student:
             student_dept = Department.query.filter_by(id=student.department).first()
             current_date = date.today().strftime("%Y-%m-%d")
-            filename = generate_file_name(student_dept.year, student_dept.section, current_date)
+            filename = generate_file_name(student_dept.course, student_dept.year, student_dept.section, current_date)
             
             # Check if the CSV file exists
             if not os.path.exists(filename):
@@ -213,7 +330,7 @@ def process_qr():
                 with open(filename, mode='a', newline='') as csv_file:
                     csv_writer = csv.DictWriter(csv_file, fieldnames=data[0].keys())
                     csv_writer.writerows(data)
-                return f"Student added to CSV file at {student_dept.year}, Year and {student_dept.section}, Section"
+                return f"Student added to CSV file at Course: ({student_dept.course}), Year: ({student_dept.year}) and Section:  ({student_dept.section})"
             else:
                 return "Student already in CSV file."
 

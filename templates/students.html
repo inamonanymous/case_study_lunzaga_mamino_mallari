@@ -6,6 +6,7 @@
     h1 {
         font-size: 24px;
         color: #333;
+        margin-top: 20px;
     }
 
     h3 {
@@ -14,61 +15,48 @@
     }
 
     /* Scan Attendance Button Style */
-    a button {
-        display: block;
+    .action-btn {
         margin-top: 20px;
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        text-decoration: none;
-    }
-
-    a button:hover {
-        background-color: #0056b3;
     }
 
     /* Table Styles */
-    table {
-        width: 100%;
-        border-collapse: collapse;
+    .custom-table {
         margin-top: 20px;
     }
 
-    th, td {
-        padding: 10px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-    }
-
-    th {
-        background-color: #f2f2f2;
-        font-weight: bold;
-    }
-
     /* QR Code Image Styles */
-    table img {
+    .qr-code-img {
         width: 50px;
         height: 50px;
     }
 
+    /* Back Button Style */
+    .back-btn {
+        margin-top: 20px;
+    }
 </style>
 
-<h1>Student Table</h1>
-<h3>{{ selected_year }} Year</h3>
-<h3>Section: {{ selected_section }}</h3>
-<a href="/student-form/{{ selected_dept }}/{{ selected_year }}/{{ selected_section }}">
-    <button>
-        Add Student
-    </button>
-</a>
+<div class="container">
+    <h1>Student Table</h1>
+    <h3>{{ selected_year }} Year</h3>
+    <h3>Section: {{ selected_section }}</h3>
 
-<a href="/scan-qr/{{ selected_year }}/{{ selected_section }}">
-    <button>Scan Attendance</button>
-</a>
-    <table>
-        <thead>
+    <div class="action-btn">
+        <a href="/student-form/{{ selected_dept }}/{{ selected_year }}/{{ selected_section }}" class="btn btn-outline-primary">
+            Add Student
+        </a>
+
+        <a href="/scan-qr/{{ selected_year }}/{{ selected_section }}" class="btn btn-outline-info">
+            Scan Attendance
+        </a>
+
+        <a href="/dashboard" class="btn btn-outline-danger">
+            Back
+        </a>
+    </div>
+
+    <table class="table table-bordered table-striped custom-table">
+        <thead class="thead-dark">
             <tr>
                 <th>First Name</th>
                 <th>Surname</th>
@@ -87,16 +75,12 @@
                         <td>{{ student.surname }}</td>
                         <td>{{ student.student_number }}</td>
                         <td>{{ student.department }}</td>
-                        <td><img src="{{ url_for('static', filename='qrcodes/'+student.student_number+'.png') }}" alt="qr code of this student" width="50%" height="50%"></td>
+                        <td><img src="{{ url_for('static', filename='qrcodes/'+student.student_number+'.png') }}" alt="qr code of this student" class="qr-code-img"></td>
                     </tr>
                 {% endfor %}
             {% endif %}
         </tbody>
     </table>
+</div>
 
-<a href="/dashboard">
-    <button>
-        Back
-    </button>
-</a>
 {% endblock %}

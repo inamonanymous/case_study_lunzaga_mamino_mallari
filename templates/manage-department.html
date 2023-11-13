@@ -1,0 +1,136 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container mt-5">
+    <h2>Manage Department</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <div>
+                <select id="filter-by-course" class="form-control" onchange="filterTable()">
+                    <option value="">All Courses</option>
+                    {% for i in department_courses %}
+                        {% for j in i %}
+                            <option value="{{ j }}">{{ j }}</option>
+                        {% endfor %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div>
+                <select id="filter-by-year" class="form-control" onchange="filterTable()">
+                    <option value="">All Years</option>
+                    {% for i in department_years %}
+                        {% for j in i %}
+                            <option value="{{ j }}">{{ j }}</option>
+                        {% endfor %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div>
+                <select id="filter-by-section" class="form-control" onchange="filterTable()">
+                    <option value="">All Sections</option>
+                    {% for i in department_sections %}
+                        {% for j in i %}
+                            <option value="{{ j }}">{{ j }}</option>
+                        {% endfor %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-danger">Back</a>
+            </div>
+        </div>
+    </div>
+
+    <table id="myTable" class="table">
+        <thead>
+            <th>Course</th>
+            <th>Year</th>
+            <th>Section</th>
+            <th>Action</th>
+        </thead>
+        <tbody>
+            {% for i in departments %}
+            <tr>
+                <td>{{ i.course }}</td>
+                <td>{{ i.year }}</td>
+                <td>{{ i.section }}</td>
+                <td><a href="#" onclick="deleteDepartment('{{ i.id }}')">Delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+<script>
+    function filterTable() {
+        var selectedCourse = document.getElementById('filter-by-course').value;
+        var selectedYear = document.getElementById('filter-by-year').value;
+        var selectedSection = document.getElementById('filter-by-section').value;
+
+        // Fetch new data using Axios based on the selected filter options
+        axios.get('/filter-departments', {
+            params: {
+                course: selectedCourse,
+                year: selectedYear,
+                section: selectedSection
+            }
+        })
+        .then(function (response) {
+            // Handle success
+            updateTable(response.data);
+        })
+        .catch(function (error) {
+            // Handle error
+            console.log(error);
+        });
+    }
+
+    function updateTable(data) {
+    var table = document.getElementById("myTable").getElementsByTagName('tbody')[0];
+
+    // Clear existing table data
+    table.innerHTML = "";
+
+    // Populate table with new data
+    data.forEach(function(item) {
+        var row = table.insertRow();
+        var cell1 = row.insertCell(0);
+        var cell2 = row.insertCell(1);
+        var cell3 = row.insertCell(2);
+        var cell4 = row.insertCell(3);
+
+        cell1.innerHTML = item['course'];
+        cell2.innerHTML = item['year'];
+        cell3.innerHTML = item['section'];
+
+        // Create the delete link
+        var deleteLink = document.createElement('a');
+        deleteLink.href = "#"; // Set a placeholder href or use javascript:void(0) to prevent the page from navigating
+        deleteLink.textContent = "Delete";
+        deleteLink.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default anchor behavior (navigating to the href)
+
+            // Make the DELETE request using Axios
+            axios.delete(`/delete-department/${item['id']}`)
+                .then(function (response) {
+                    // Handle success
+                    console.log('Delete request successful');
+                    // Optionally, update the table or remove the row
+                    location.reload(true);
+                })
+                .catch(function (error) {
+                    // Handle error
+                    console.error('Delete request failed', error);
+                });
+        });
+
+        // Append the delete link to cell4
+        cell4.appendChild(deleteLink);
+    });
+}
+</script>
+{% endblock %}

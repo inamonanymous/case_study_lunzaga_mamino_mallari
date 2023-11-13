@@ -1,0 +1,145 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container mt-5">
+    <h2>Manage Student</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="sort-by-course">Sort by Course:</label>
+                <select id="sort-by-course" class="form-control" onchange="sortTable()">
+                    <option value="" selected>Default</option>
+                    {% for i in department_courses %}
+                        {% for j in i %}
+                            <option value="{{ j }}">{{ j }}</option>
+                        {% endfor %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="sort-by-year">Sort by Year:</label>
+                <select id="sort-by-year" class="form-control" onchange="sortTable()">
+                    <option value="" selected>Default</option>
+                    {% for i in department_years %}
+                        {% for j in i %}
+                            <option value="{{ j }}">{{ j }}</option>
+                        {% endfor %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="sort-by-section">Sort by Section:</label>
+                <select id="sort-by-section" class="form-control" onchange="sortTable()">
+                    <option value="" selected>Default</option>
+                    {% for i in department_sections %}
+                        {% for j in i %}
+                            <option value="{{ j }}">{{ j }}</option>
+                        {% endfor %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-danger">Back</a>
+            </div>
+        </div>
+    </div>
+
+    <table id="myTable" class="table">
+        <thead>
+            <th>Course</th>
+            <th>Section</th>
+            <th>Year</th>
+            <th>Firstname</th>
+            <th>Student Number</th>
+            <th>QR Code</th>
+            <th>Surname</th>
+        </thead>
+        <tbody>
+            {% for i in students %}
+            <tr>
+                <td>{{ i.course }}</td>
+                <td>{{ i.section }}</td>
+                <td>{{ i.year }}</td>
+                <td>{{ i.firstname }}</td>
+                <td>{{ i.student_number }}</td>
+                <td>
+                    <img src="{{ url_for('static', filename='qrcodes/'+i.student_number+'.png') }}" alt="qr code of this student" width="50%" height="50%">
+                </td>
+                <td>{{ i.surname }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+    <script>
+        function sortTable() {
+        var selectedCourse = document.getElementById('sort-by-course').value;
+        var selectedYear = document.getElementById('sort-by-year').value;
+        var selectedSection = document.getElementById('sort-by-section').value;
+        
+        // Fetch new data using Axios based on the selected sorting options
+        axios.get('/filter-students', {
+            params: {
+                course: selectedCourse,
+                year: selectedYear,
+                section: selectedSection,
+            }
+        })
+        .then(function (response) {
+            // Handle success
+            updateTable(response.data);
+        })
+        .catch(function (error) {
+            // Handle error
+            console.log(error);
+        });
+    }
+
+        function updateTable(data) {
+            var table = document.getElementById("myTable").getElementsByTagName('tbody')[0];
+            
+            // Clear existing table data
+            table.innerHTML = "";
+
+            // Check if data is not empty
+            if (data.length > 0) {
+        // Get the keys from the first item in the data array
+                var keys = Object.keys(data[0]);
+
+                // Create table headers
+                var headerRow = table.insertRow();
+                keys.forEach(function (key) {
+                    var headerCell = headerRow.insertCell();
+                    headerCell.innerHTML = formatKey(key);
+                });
+
+                // Populate table with new data
+                data.forEach(function (item) {
+                    var row = table.insertRow();
+                    keys.forEach(function (key) {
+                        var cell = row.insertCell();
+                        cell.innerHTML = item[key];
+                    });
+                });
+            }
+            }
+        
+    function formatKey(key) {
+        // Split the key by underscore
+        var words = key.split('_');
+
+        // Capitalize the first letter of each word
+        var formattedKey = words.map(function(word) {
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        }).join(' ');
+
+        return formattedKey;
+    }
+    </script>
+{% endblock %}

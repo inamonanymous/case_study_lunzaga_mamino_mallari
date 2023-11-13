@@ -1,15 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
 
 <style>
-    /* Additional styles can be added here */
     .card {
-        margin-bottom: 20px; /* Adds spacing between cards */
+        margin-bottom: 20px;
     }
-    
-    /* Your existing styles */
+
     .select_department_div {
         max-width: 400px;
         margin: 0 auto;
@@ -19,12 +17,12 @@
         border-radius: 5px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-    
+
     h3 {
         color: #333;
     }
-    
-    select {
+
+    select, input {
         width: 100%;
         padding: 10px;
         margin-top: 5px;
@@ -33,7 +31,7 @@
         background-color: #fff;
     }
 
-    #submit {
+    .btn-custom {
         display: block;
         margin-top: 10px;
         padding: 10px 20px;
@@ -44,11 +42,11 @@
         cursor: pointer;
     }
 
-    #submit:hover {
+    .btn-custom:hover {
         background-color: #0056b3;
     }
 
-    a button {
+    .btn-link-custom {
         display: block;
         margin-top: 20px;
         padding: 10px 20px;
@@ -59,29 +57,32 @@
         text-decoration: none;
     }
 
-    a button:hover {
+    .btn-link-custom:hover {
         background-color: #0056b3;
     }
 </style>
 
+
 <div class="container mt-5">
     <div class="row">
+
         <!-- First Column -->
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <button onclick="showDeptForm(this)">
-                        Add Department
+                    <h3 class="card-title">Add Department</h3>
+                    <button class="btn btn-outline-primary" onclick="showDeptForm(this)">
+                        Show Form
                     </button>
                     <div id="department-form" style="display: none;">
                         <form action="/save-department" method="post">
-                            <label for="course">Course: </label>
-                            <input type="text" id="course" name="course"><br>
-                            <label for="year">Year: </label>
-                            <input type="text" id="year" name="year"><br>
-                            <label for="section">Section: </label>
-                            <input type="text" id="section" name="section"><br>
-                            <button type="submit">Submit</button>
+                            <label for="course">Course:</label>
+                            <input type="text" id="course" name="course" class="form-control"><br>
+                            <label for="year">Year:</label>
+                            <input type="text" id="year" name="year" class="form-control"><br>
+                            <label for="section">Section:</label>
+                            <input type="text" id="section" name="section" class="form-control"><br>
+                            <button type="submit" class="btn btn-outline-primary">Submit</button>
                         </form>
                     </div>
                 </div>
@@ -95,7 +96,7 @@
                     <form action="/get-section" method="POST" class="select_department_div">
                         <div>
                             <h3>Select Student Room</h3>
-                            <select id="deptSelect" name="dept">
+                            <select id="deptSelect" name="dept" class="form-control">
                                 <option value="" disabled selected>Select Department</option>
                                 {% for i in department_courses %}
                                     {% for j in i %}
@@ -106,23 +107,19 @@
                         </div>
                         <div id="sectionDropdown" style="display: none;">
                             <h3>Select Student Level</h3>
-                            <select id="yearSelect" name="year">
+                            <select id="yearSelect" name="year" class="form-control">
                                 <option value="" disabled selected>Select Year</option>
-                                {% for i in department_years %}
-                                    {% for j in i %}
-                                        <option value="{{ j }}">{{ j }}</option>
-                                    {% endfor %}
-                                {% endfor %}
+                                <!-- Options will be dynamically added here -->
                             </select>
                         </div>
                         <div id="sectionDropdown1" style="display: none;">
                             <h3>Select a Section</h3>
-                            <select name="section">
+                            <select name="section" class="form-control">
                                 <option value="" disabled selected>Select Section</option>
                                 <!-- Options will be dynamically added here -->
                             </select>
                         </div>
-                        <input type="submit" id="submit" value="Submit" style="display: none;">
+                        <input type="submit" id="submit" value="Submit" class="btn btn-outline-primary" style="display: none;">
                     </form>
                 </div>
             </div>
@@ -132,18 +129,38 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <!-- Content for the third container -->
-                    jsdfo;ajshfkjashfaklsjfhasdjfh
+                    <h3 class="card-title">Manage Records</h3>
+                    <form action="manage-records">
+                        <select name="manage-records-select" id="manage-records-select" class="form-control">
+                            <option value="" selected disabled>Select Option</option>
+                            <option value="0">Student</option>
+                            <option value="1">Department</option>
+                        </select>
+                        <button type="submit" name="recordBtn" class="btn btn-outline-warning">Submit</button>
+                    </form>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
-
 
 {% block javascript %}
 <script>
     $(document).ready(function () {
+        $('#manage-records-select').change(function (){
+            var manageRecordsSelect = $(this).val();
+            if (manageRecordsSelect==="0"){
+                
+            } else if (manageRecordsSelect==="1") {
+                
+            } else {
+                console.log(false);
+            }
+        });
+
+
+
         $('#deptSelect').change(function () {
             var selectedDept = $(this).val();
             var sectionOptions = '<option value="" disabled selected>Select Section</option>';
