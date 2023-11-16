@@ -20,6 +20,13 @@ def generate_file_name(dept_folder, year_folder, section_folder, current_date=da
 
     return os.path.join(data_folder, f"attendance_at_{current_date}.csv")
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    if 'submit' in request.form:
+        session.clear()
+        return redirect(url_for('index'))
+    return redirect(request.url)
+
 @app.route('/delete-department/<int:id>', methods=['DELETE'])
 def delete_department(id):
     if 'username' not in session:
