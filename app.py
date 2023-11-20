@@ -229,7 +229,12 @@ def save_department():
         course, year, section = request.form['course'].strip(), request.form['year'].strip(), request.form['section'].strip()
         check_dept = Department.query.filter_by(course=course, year=year, section=section).first()
         if check_dept:
-            return "not allowed"
+            return f"""
+                    <script>
+                        alert('Cannot add existing department');
+                        window.location.href='/dashboard';
+                    </script>
+                    """
         dept_entry = Department(
             course=course,
             year=year,
@@ -351,13 +356,36 @@ def process_qr():
                 with open(filename, mode='a', newline='') as csv_file:
                     csv_writer = csv.DictWriter(csv_file, fieldnames=data[0].keys())
                     csv_writer.writerows(data)
-                return f"Student added to CSV file at Course: ({student_dept.course}), Year: ({student_dept.year}) and Section:  ({student_dept.section})"
-            else:
-                return "Student already in CSV file."
 
-        return f"{student.firstname}"
+                thisString = f"""
+                                <script>
+                                    alert("Student added to CSV file at Course: ({student_dept.course}), Year: ({student_dept.year}) and Section:  ({student_dept.section})");
+                                    window.location.href="/dashboard";
+                                </script>
+                                """
+                return thisString
+            else:
+                
+                return f"""
+                    <script>
+                        alert("Student already in CSV file");
+                        window.location.href="/dashboard";
+                    </script>
+                    """
+
+        return f"""         
+                    <script>
+                        alert("No Student Found");
+                        window.location.href="/dashboard";
+                    </script>
+                    """
     else:
-        return 'No QR code content received'
+        return f"""
+                    <script>
+                        alert("Unrecognized QR Code Received");
+                        window.location.href="/dashboard";
+                    </script>
+                    """
 
 if __name__ == '__main__':
     
