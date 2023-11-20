@@ -75,7 +75,9 @@
                         <td>{{ student.surname }}</td>
                         <td>{{ student.student_number }}</td>
                         <td>{{ student.department }}</td>
-                        <td><img src="{{ url_for('static', filename='qrcodes/'+student.student_number+'.png') }}" alt="qr code of this student" class="qr-code-img"></td>
+                        <td>
+                            <a href="{{ url_for('static', filename='qrcodes/'+student.student_number+'.png') }}"><img src="{{ url_for('static', filename='qrcodes/'+student.student_number+'.png') }}" alt="qr code of this student" width="50%" height="50%"></a>
+                        </td>
                     </tr>
                 {% endfor %}
             {% endif %}

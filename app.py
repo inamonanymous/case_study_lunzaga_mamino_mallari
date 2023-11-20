@@ -27,6 +27,18 @@ def logout():
         return redirect(url_for('index'))
     return redirect(request.url)
 
+@app.route('/delete-student/<string:student_number>', methods=['DELETE'])
+def delete_student(student_number):
+    if 'username' not in session:
+        return redirect(url_for('index'))
+    target_student = Student.query.filter_by(student_number=student_number).first()
+    if not target_student:
+        return jsonify({"message": "not found"}), 404
+    db.session.delete(target_student)
+    db.session.commit()
+    return jsonify({"message": "deleted"}), 204
+
+    
 @app.route('/delete-department/<int:id>', methods=['DELETE'])
 def delete_department(id):
     if 'username' not in session:
@@ -247,9 +259,11 @@ def admin_login():
         if Admin.login_true(username, password):
             session['username'] = username
             return redirect(url_for('dashboard'))
-        return f"wrong password"
-    print(Admin.login_true(username, password))
-    print('here')
+        return f""" <script>
+                        alert("Wrong Password");
+                        window.location.href ="/";
+                    </script>
+                """
     return redirect(url_for('index'))
 
 @app.route('/add-student', methods=['POST'])

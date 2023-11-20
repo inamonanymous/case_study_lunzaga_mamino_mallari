@@ -59,7 +59,7 @@
                 <td>{{ i.course }}</td>
                 <td>{{ i.year }}</td>
                 <td>{{ i.section }}</td>
-                <td><a href="#" onclick="deleteDepartment('{{ i.id }}')">Delete</a></td>
+                <td>__</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -125,7 +125,7 @@
                 .catch(function (error) {
                     // Handle error
                     console.error('Delete request failed', error);
-                });
+            })
         });
 
         // Append the delete link to cell4

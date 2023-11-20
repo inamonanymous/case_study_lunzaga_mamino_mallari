@@ -51,6 +51,7 @@
 
     <table id="myTable" class="table">
         <thead>
+            <th>Action</th>
             <th>Course</th>
             <th>Section</th>
             <th>Year</th>
@@ -62,13 +63,16 @@
         <tbody>
             {% for i in students %}
             <tr>
+                <td>
+                    __
+                </td>
                 <td>{{ i.course }}</td>
                 <td>{{ i.section }}</td>
                 <td>{{ i.year }}</td>
                 <td>{{ i.firstname }}</td>
                 <td>{{ i.student_number }}</td>
                 <td>
-                    <img src="{{ url_for('static', filename='qrcodes/'+i.student_number+'.png') }}" alt="qr code of this student" width="50%" height="50%">
+                    <a href="{{ url_for('static', filename='qrcodes/'+i.student_number+'.png') }}"><img src="{{ url_for('static', filename='qrcodes/'+i.student_number+'.png') }}" alt="qr code of this student" width="50%" height="50%"></a>
                 </td>
                 <td>{{ i.surname }}</td>
             </tr>
@@ -109,23 +113,54 @@
 
             // Check if data is not empty
             if (data.length > 0) {
-        // Get the keys from the first item in the data array
+                // Get the keys from the first item in the data array
+                console.log("Data "+data);
                 var keys = Object.keys(data[0]);
-
-                // Create table headers
-                var headerRow = table.insertRow();
-                keys.forEach(function (key) {
-                    var headerCell = headerRow.insertCell();
-                    headerCell.innerHTML = formatKey(key);
-                });
+                
+                
 
                 // Populate table with new data
                 data.forEach(function (item) {
                     var row = table.insertRow();
+                    var deleteCell = row.insertCell();
+                    var deleteLink = document.createElement('a');
+                    deleteLink.href = "#"; // Set a placeholder href or use javascript:void(0) to prevent the page from navigating
+                    deleteLink.textContent = "Delete";
+                    deleteLink.addEventListener('click', function(event) {
+                        if (confirm("Are you sure you want to delete this student?")){
+                            console.log(item['student_number'])
+                            // Make the DELETE request using Axios
+                            axios.delete(`/delete-student/${item['student_number']}`)
+                                .then(function (response) {
+                                    // Handle success
+                                        console.log('Delete request successful');
+                                        location.reload(true);
+
+                                    
+
+                                    // Optionally, update the table or remove the row
+                                })
+                                .catch(function (error) {
+                                    // Handle error
+                                    console.log(error)
+                                });
+                        } else {
+                            
+                        }
+                        
+                    });
+
+                    // Append the delete link to cell4
                     keys.forEach(function (key) {
                         var cell = row.insertCell();
-                        cell.innerHTML = item[key];
+                        // show the image using the path value of qr code
+                        if (key==="student_qrcode"){
+                            cell.innerHTML = `<a href="${item[key]}"><img src="${item[key]}" alt="qr code of this student" width="50%" height="50%"></a>]`
+                        } else {
+                            cell.innerHTML = item[key];
+                        }
                     });
+                    deleteCell.appendChild(deleteLink);
                 });
             }
             }
