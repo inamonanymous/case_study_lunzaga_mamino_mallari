@@ -9,18 +9,28 @@
     
     <style>
         body {
-            background-size: cover; /* Adjust the size as needed */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
             background-position: center center;
-            
-            /* Set the height of the container to 100% of the viewport height */
-            height: 100vh;
-            
-            /* Center content vertically and horizontally using flexbox */
-            
         }
-        </style>
+
+        .content {
+            flex: 1;
+        }
+
+        footer {
+            background-color: #f8f9fa; /* Change the background color as needed */
+            padding: 20px;
+            text-align: center;
+            margin-top: auto;
+        }
+    </style>
 </head>
 <body>
     
