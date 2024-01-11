@@ -4,6 +4,11 @@
 <style>
     .card {
         margin-bottom: 20px;
+        max-width: 100rem;
+    }
+
+    .col-md-4 {
+        max-height: 500rem;
     }
 
     .select_department_div {
@@ -60,13 +65,15 @@
     }
 </style>
 
+    
+
+<div class="container mt-5">
     <div class="logout-btn float-right mt-2">
         <form action="/logout" method="post">
             <button type="submit" name="submit" class="btn btn-outline-danger">Logout</button>
         </form>
     </div>
 
-<div class="container mt-5">
     <div class="row">
         <!-- First Column -->
         

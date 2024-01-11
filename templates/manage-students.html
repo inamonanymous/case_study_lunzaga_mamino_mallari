@@ -44,7 +44,7 @@
         </div>
         <div class="col-md-4">
             <div class="form-group">
-                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-danger">Back</a>
+                <a href="javascript:history.back()" class="btn btn-outline-danger">Back</a>
             </div>
         </div>
     </div>
@@ -116,9 +116,6 @@
                 // Get the keys from the first item in the data array
                 console.log("Data "+data);
                 var keys = Object.keys(data[0]);
-                
-                
-
                 // Populate table with new data
                 data.forEach(function (item) {
                     var row = table.insertRow();

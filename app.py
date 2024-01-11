@@ -273,50 +273,53 @@ def admin_login():
 
 @app.route('/add-student', methods=['POST'])
 def add_student():
-    firstname = request.form.get('firstname')
-    surname = request.form.get('surname')
-    student_number = request.form.get('student_number')
-    section = request.form.get('section')
-    year = request.form.get('year')
-    department = request.form.get('department')
+    try:
+        firstname = request.form.get('firstname')
+        surname = request.form.get('surname')
+        student_number = request.form.get('student_number')
+        section = request.form.get('section')
+        year = request.form.get('year')
+        department = request.form.get('department')
 
-    # Generate a QR code
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
-        border=4,
-    )
-    qr.add_data(student_number)  # You can add any data you want to encode in the QR code.
-    qr.make(fit=True)
+        # Generate a QR code
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(student_number)  # You can add any data you want to encode in the QR code.
+        qr.make(fit=True)
 
-    # Create the QR code image
-    qr_code_image = qr.make_image(fill_color="black", back_color="white")
+        # Create the QR code image
+        qr_code_image = qr.make_image(fill_color="black", back_color="white")
 
-    # Save the QR code image to a file
-    if not os.path.exists(QR_CODE_FOLDER):
-        os.makedirs(QR_CODE_FOLDER)
+        # Save the QR code image to a file
+        if not os.path.exists(QR_CODE_FOLDER):
+            os.makedirs(QR_CODE_FOLDER)
 
-    qr_code_filename = os.path.join(QR_CODE_FOLDER, f'{student_number}.png')
-    qr_code_image.save(qr_code_filename)
+        qr_code_filename = os.path.join(QR_CODE_FOLDER, f'{student_number}.png')
+        qr_code_image.save(qr_code_filename)
 
-    # Create a new student record with the QR code data or image path
-    student = Student(
-        firstname=firstname,
-        surname=surname,
-        student_number=student_number,
-        section=section,
-        department=department,
-        qrcode=qr_code_filename,
-        year=year
-          # You can also store the QR code data here if needed
-    )
+        # Create a new student record with the QR code data or image path
+        student = Student(
+            firstname=firstname,
+            surname=surname,
+            student_number=student_number,
+            section=section,
+            department=department,
+            qrcode=qr_code_filename,
+            year=year
+            # You can also store the QR code data here if needed
+        )
 
-    # Add the student record to the database
-    db.session.add(student)
-    db.session.commit()
+        # Add the student record to the database
+        db.session.add(student)
+        db.session.commit()
+        return f"<script>window.history.go(-2);</script>"
+    except:
+        return f"<script>alert('Cannot Add Existing Student! Student Number: {student_number}'); history.back();</script>"
 
-    return redirect(url_for('dashboard'))
 
 @app.route('/process-qr', methods=['POST'])
 def process_qr():
@@ -359,31 +362,31 @@ def process_qr():
 
                 thisString = f"""
                                 <script>
-                                    alert("Student added to CSV file at Course: ({student_dept.course}), Year: ({student_dept.year}) and Section:  ({student_dept.section})");
-                                    window.location.href="/dashboard";
+                                    alert("Student added to CSV file at Course: ({student_dept.course}), Year: ({student_dept.year}) and Section: ({student_dept.section})");
+                                    history.back();
                                 </script>
-                                """
+                            """
                 return thisString
             else:
                 
                 return f"""
                     <script>
                         alert("Student already in CSV file");
-                        window.location.href="/dashboard";
+                        history.back()
                     </script>
                     """
 
         return f"""         
                     <script>
                         alert("No Student Found");
-                        window.location.href="/dashboard";
+                        history.back()
                     </script>
                     """
     else:
         return f"""
                     <script>
                         alert("Unrecognized QR Code Received");
-                        window.location.href="/dashboard";
+                        history.back()
                     </script>
                     """
 
