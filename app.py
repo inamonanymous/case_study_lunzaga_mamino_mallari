@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for, session, jsonify
 from sqlalchemy import and_, or_
+from sqlalchemy.orm import aliased
 from flask_migrate import Migrate
 import qrcode
 import os
@@ -14,8 +15,8 @@ QR_CODE_FOLDER = 'static/qrcodes'  # Folder to save QR code images
 app.secret_key = "mamino_mallari_lunzaga"
 migrate = Migrate(app, db)
 
-def generate_file_name(dept_folder, year_folder, section_folder, current_date=date.today().strftime("%Y-%m-%d")):
-    data_folder = os.path.join('attendance_data', dept_folder, year_folder, section_folder)
+def generate_file_name(prof_name, dept_folder, year_folder, section_folder, current_date=date.today().strftime("%Y-%m-%d")):
+    data_folder = os.path.join('attendance_data',prof_name, dept_folder, year_folder, section_folder)
     os.makedirs(data_folder, exist_ok=True)
 
     return os.path.join(data_folder, f"attendance_at_{current_date}.csv")
@@ -43,7 +44,8 @@ def delete_student(student_number):
 def delete_department(id):
     if 'username' not in session:
         return redirect(url_for('index'))
-    target_department = Department.query.filter_by(id=id).first()
+    current_user = Admin.query.filter_by(username=session.get('username', "")).first()
+    target_department = Department.query.filter_by(id=id, admin_id=current_user.id).first()
     if not target_department:
         return jsonify({"message": "not deleted"})    
     db.session.delete(target_department)
@@ -56,17 +58,17 @@ def filter_departments():
         course = request.args.get("course")
         year = request.args.get("year")
         section = request.args.get("section")
-
+        current_user = Admin.query.filter_by(username=session.get('username', "")).first()
         query = Department.query
 
         if course:
-            query = query.filter(Department.course == str(course))
+            query = query.filter((Department.course == str(course))&(Department.admin_id==current_user.admin_id))
 
         if year:
-            query = query.filter(Department.year == str(year))
+            query = query.filter((Department.year == str(year)) &(Department.admin_id==current_user.admin_id))
 
         if section:
-            query = query.filter(Department.section == str(section))
+            query = query.filter((Department.section == str(section)) &(Department.admin_id==current_user.admin_id))
 
         departments = query.all()
 
@@ -128,15 +130,18 @@ def filter_students():
 def manage_records():
     if 'username' in session:
         option = request.args.get("manage-records-select")
-        department_courses = Department.query.with_entities(Department.course).distinct().all()
-        department_years = Department.query.with_entities(Department.year).distinct().all()
-        department_sections = Department.query.with_entities(Department.section).distinct().all()
+        current_user = Admin.query.filter_by(username=session.get('username', "")).first()
+        department_courses = Department.query.with_entities(Department.course).distinct().filter_by(admin_id=current_user.id).all()
+        department_years = Department.query.with_entities(Department.year).distinct().filter_by(admin_id=current_user.id).all()
+        department_sections = Department.query.with_entities(Department.section).distinct().filter_by(admin_id=current_user.id).all()
+        user_fullname = f"{current_user.surname}, {current_user.firstname}"
         if option=="1":
-            departments = Department.query.all()    
+            departments = Department.query.filter_by(admin_id=current_user.id).all()    
             return render_template('manage-department.html', departments=departments,
                                 department_courses=department_courses,
                                 department_years=department_years,
-                                department_sections=department_sections)
+                                department_sections=department_sections,
+                                user_fullname=user_fullname)
 
         students = Student.query.\
             with_entities(Student.firstname,
@@ -153,7 +158,8 @@ def manage_records():
                                students=students, 
                                department_courses=department_courses,
                                department_years=department_years,
-                               department_sections=department_sections)
+                               department_sections=department_sections,
+                               user_fullname=user_fullname)
     return redirect(url_for('index'))
 
 @app.route('/')
@@ -179,13 +185,30 @@ def student_form(dept, year, section):
 @app.route('/section-page', methods=['GET'])
 def section_page():
     if 'username' in session:
+        current_user = Admin.query.filter_by(username=session.get('username', "")).first()
+        user_fullname = f"{current_user.surname}, {current_user.firstname}"
         selected_dept, selected_year, selected_section = request.args.get('dept'), request.args.get('year'), request.args.get('section')
-        student_dept = Department.query.filter_by(course=selected_dept, section=selected_section).first()
+        
+        # Modify the query to filter by admin_id
+        student_dept = Department.query.filter_by(
+            course=selected_dept,
+            section=selected_section,
+            admin_id=current_user.id
+        ).first()
         if not student_dept:
             return redirect(url_for('dashboard'))
+        print(f"{user_fullname} {student_dept.admin_id}")
         students = Student.query.filter_by(department=student_dept.id).all()
-        return render_template('students.html', selected_dept=selected_dept, selected_year=selected_year, selected_section=selected_section, students=students)
+        if not students:
+            print(False)
+        for i in students:
+            print(f"Student Department ID: {i.department}")
+            
+        print("=== End Debug ===")
+
+        return render_template('students.html', selected_dept=selected_dept, selected_year=selected_year, selected_section=selected_section, students=students, user_fullname=user_fullname)
     return redirect(url_for('index'))
+
 
 @app.route('/get-section', methods=['POST'])
 def get_section():
@@ -202,7 +225,8 @@ def get_section():
 @app.route('/get-section-by-level/<string:year>/<string:dept>')
 def get_section_by_level(year, dept):
     if 'username' in session:
-        department_section_by_level = Department.query.filter_by(year=year, course=dept).with_entities(Department.section).distinct().all()
+        current_user = Admin.query.filter_by(username=session.get('username', "")).first()
+        department_section_by_level = Department.query.filter_by(year=year, course=dept, admin_id=current_user.id).with_entities(Department.section).distinct().all()
         if not department_section_by_level:
             return jsonify({"message": "object empty"}), 401
         data = {
@@ -214,7 +238,8 @@ def get_section_by_level(year, dept):
 @app.route('/get-year-by-department/<string:dept>')
 def get_year_by_department(dept):
     if 'username' in session:
-        department_year_by_dept = Department.query.filter_by(course=dept).with_entities(Department.year).distinct().all()
+        current_user = Admin.query.filter_by(username=session.get('username', "")).first()
+        department_year_by_dept = Department.query.filter_by(course=dept, admin_id=current_user.id).with_entities(Department.year).distinct().all()
         if not department_year_by_dept:
             return jsonify({"message": "object empty"}), 401
         data = {
@@ -227,7 +252,9 @@ def get_year_by_department(dept):
 def save_department():
     if 'username' in session:
         course, year, section = request.form['course'].strip(), request.form['year'].strip(), request.form['section'].strip()
-        check_dept = Department.query.filter_by(course=course, year=year, section=section).first()
+        current_user = Admin.query.filter_by(username=session.get('username', "")).first()
+        check_dept = Department.query.filter_by(course=course, year=year, section=section, admin_id=current_user.id).first()
+        current_user = Admin.query.filter_by(username=session.get('username', "")).first()
         if check_dept:
             return f"""
                     <script>
@@ -238,19 +265,50 @@ def save_department():
         dept_entry = Department(
             course=course,
             year=year,
-            section=section
+            section=section,
+            admin_id=current_user.id
         )
         db.session.add(dept_entry)
         db.session.commit()
         return redirect(url_for('dashboard'))
     return redirect(url_for('index'))
 
+@app.route('/create-account', methods=['POST'])
+def create_account():
+    if not 'username' in session:
+        return redirect(url_for('index'))
+    firstname, surname, username, password, password2 = request.form['firstname'], request.form['surname'], request.form['username'], request.form['password'], request.form['password2']
+    try:
+        if Admin.create_account(firstname.strip(), surname.strip(), username.strip(), password.strip(), password2.strip()):
+            return f"""
+                        <script>
+                            alert("Admin successfully added!");
+                            history.back();
+                        </script>
+                    """
+        return f"""
+                    <script>
+                        alert("Admin failed to add!");
+                        history.back();
+                        location.reload(true);
+                    </script>
+                """
+    except:
+        return f"""
+                    <script>
+                        alert("Username already exists");
+                        history.back();
+                        location.reload(true);
+                    </script>
+                """
+
 @app.route('/dashboard', methods=['POST', 'GET'])
 def dashboard():
     if 'username' in session:
-        department_courses = Department.query.with_entities(Department.course).distinct().all()
-        department_years = Department.query.with_entities(Department.year).distinct().all()
-        department_sections = Department.query.with_entities(Department.section).distinct().all()
+        current_user = Admin.query.filter_by(username=session.get('username', "")).first()
+        department_courses = Department.query.with_entities(Department.course).distinct().filter_by(admin_id=current_user.id).all()
+        department_years = Department.query.with_entities(Department.year).distinct().filter_by(admin_id=current_user.id).all()
+        department_sections = Department.query.with_entities(Department.section).distinct().filter_by(admin_id=current_user.id).all()
         return render_template('dashboard.html',
                                 department_courses=department_courses,
                                 department_years=department_years,
@@ -273,6 +331,8 @@ def admin_login():
 
 @app.route('/add-student', methods=['POST'])
 def add_student():
+    if not 'username' in session:
+        return redirect(url_for('index'))
     try:
         firstname = request.form.get('firstname')
         surname = request.form.get('surname')
@@ -280,6 +340,14 @@ def add_student():
         section = request.form.get('section')
         year = request.form.get('year')
         department = request.form.get('department')
+        current_user = Admin.query.filter_by(username=session.get('username', "")).first()
+        user_fullname = f"{current_user.surname}, {current_user.firstname}"
+
+        qr_code_filename = os.path.join(QR_CODE_FOLDER, user_fullname, f'{student_number}.png')
+        if os.path.exists(qr_code_filename):
+        # File already exists, handle accordingly (e.g., display a message or redirect)
+            return f"<script>alert('Cannot Add Existing Student! Student Number: {student_number}'); history.back();</script>"
+        # You might want to add a flash message or redirect here
 
         # Generate a QR code
         qr = qrcode.QRCode(
@@ -295,12 +363,12 @@ def add_student():
         qr_code_image = qr.make_image(fill_color="black", back_color="white")
 
         # Save the QR code image to a file
-        if not os.path.exists(QR_CODE_FOLDER):
-            os.makedirs(QR_CODE_FOLDER)
+        if not os.path.exists(QR_CODE_FOLDER+f"/{user_fullname}"):
+            os.makedirs(QR_CODE_FOLDER+f"/{user_fullname}")
 
-        qr_code_filename = os.path.join(QR_CODE_FOLDER, f'{student_number}.png')
+        qr_code_filename = os.path.join(QR_CODE_FOLDER+f"/{user_fullname}", f'{student_number}.png')
         qr_code_image.save(qr_code_filename)
-
+        
         # Create a new student record with the QR code data or image path
         student = Student(
             firstname=firstname,
@@ -316,7 +384,7 @@ def add_student():
         # Add the student record to the database
         db.session.add(student)
         db.session.commit()
-        return f"<script>window.history.go(-2);</script>"
+        return f"<script>window.history.go(-2); location.reload();</script>"
     except:
         return f"<script>alert('Cannot Add Existing Student! Student Number: {student_number}'); history.back();</script>"
 
@@ -326,10 +394,12 @@ def process_qr():
     qr_content = request.form.get('qr_content')
     if qr_content:
         student = Student.query.filter_by(student_number=qr_content).first()
+        current_user = Admin.query.filter_by(username=session.get('username', "")).first()
         if student:
             student_dept = Department.query.filter_by(id=student.department).first()
             current_date = date.today().strftime("%Y-%m-%d")
-            filename = generate_file_name(student_dept.course, student_dept.year, student_dept.section, current_date)
+            instructor_name = f"{current_user.surname}, {current_user.firstname}"
+            filename = generate_file_name(instructor_name ,student_dept.course, student_dept.year, student_dept.section, current_date)
             
             # Check if the CSV file exists
             if not os.path.exists(filename):
@@ -362,7 +432,7 @@ def process_qr():
 
                 thisString = f"""
                                 <script>
-                                    alert("Student added to CSV file at Course: ({student_dept.course}), Year: ({student_dept.year}) and Section: ({student_dept.section})");
+                                    alert("Student added to CSV file at folder attendance_data -> Instructor ({instructor_name}) ->  Course: ({student_dept.course}) -> Year: ({student_dept.year}) -> Section: ({student_dept.section})");
                                     history.back();
                                 </script>
                             """
